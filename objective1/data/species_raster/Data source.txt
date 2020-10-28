@@ -1,0 +1,9 @@
+Species occupancy maps are taken from:
+C:\Dropbox (ScreenForBio)\Projects\WWF_subcontract\GIS\Rasters\Species_predictions
+
+Files were renamed to remove _Distribution:
+Annamite striped rabbit_Distribution.tif -> Annamite striped rabbit.tif
+
+
+Species richness maps are taken from:
+C:\Dropbox (ScreenForBio)\Projects\WWF_subcontract\GIS\Rasters\Species_richness

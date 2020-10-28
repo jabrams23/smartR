@@ -1,0 +1,105 @@
+sampleID	Arborophila sp.	Bandicota savelei	Bandicota sp.	Bos taurus	Callosciurus erythraeus	Canis lupus familiaris	Capricornis milneedwardsii	Chrotogale owstoni	Galeopterus sp.	Gallus gallus	Herpestes sp.	Herpestes urva	Hystrix brachyura	Leopoldamys edwardsi	Lophura sp.	Macaca arctoides	Macaca mulatta	Martes flavigula	Melogale moschata	Muntiacus truongsonensis	Muntiacus vaginalis	Muscicapidae	Nesolagus timminsi	Paguma larvata	Paradoxurus hermaphroditus	Pardofelis marmota	Prionailurus bengalensis	Pygathrix nemaeus	Rattus sp.	Ratufa sp.	Rhizomys pruinosus	Sus scrofa	Tupaia belangeri	Turdus sp.	Ursus thibetanus	Viverra sp.	Atherurus sp.
+LXS01-1-B														1																							
+LXS02-2-B																1																					
+LXS04-1-B																			1																		
+LXS10-2-B																								1								1					
+LXS11-1-B							1																														
+LXS11-1-T		1				1																															
+LXS11-2-B																			1												1						
+LXS14-1-B																																1					
+LXS14-2-B							1	1																		1											
+LXS14-2-T																			1				1									1					
+LXS19-2-B																1																					
+LXS20-1-B																				1					1												
+LXS20-1-T											1																										
+LXS21-2-T														1																							
+LXS22-1-B																											1										
+LXS22-2-B																			1																		
+LXS24-1-B																1																					
+LXS24-2-B																1																					
+LXS24-2-T							1											1	1																		
+LXS25-1-B				1			1													1												1			1		
+LXS25-1-T							1																														
+LXS25-2-B							1													1																1	
+LXS26-1-B				1			1												1													1					
+LXS26-2-B				1																1																2	
+LXS30-1-B																1			1	1																	
+LXS30-1-T																1																					
+LXS30-2-B																																1					
+LXS30-2-T																			1																		
+LXS31-2-B																						1															
+LXS32-1-B																																1		1			
+LXS32-2-B																							1	1								1					
+LXS33-1-B																			1				1	1													
+LXS34-1-B							1				1									1												1					
+LXS34-1-T																																1					
+LXS34-2-B	1																																				
+LXS36-1-B																				1												1					
+LXS37-2-B																												1									
+LXS38-1-B																												1									
+LXS38-1-T																			1																		
+LXS40-2-B																1			1													1					
+LXS41-2-B									1																					1							
+LXS44-2-B																			1																		
+LXS45-2-B																			1					1													
+LXS48-1-B						1																										1					
+LXS48-2-B																1																					
+LXS51-2-B							1																														
+VBC10-1-B										1																											
+VBC17-1-T																1																					
+VBC25-1-B																																					1
+VBC29-2-B													1																								
+VBC48-2-B																																					1
+VSC02-1-B																																1					1
+VSC03-1-B																																1					
+VSC07-1-B																1																					
+VSC09-2-B																								1													
+VSC11-1-B																																					1
+VSC12-1-B																																1					
+VSC12-2-B															1																						
+VSC13-1-B													1																								
+VSC15-2-B																	1																				
+VSC16-2-B																					1											1					
+VSC20-1-B							1																									1					
+VSC20-2-B							1																									1					
+VSC21-2-B																	1																				
+VSC22-1-T					1																																
+VSC23-1-B													1																			1					
+VSC24-2-B																																1					
+VSC26-1-B																					1																
+VSC27-1-B												1									1																
+VSC27-1-T												1																					1				
+VSC27-2-B																							1														
+VSC27-2-T																			1										1			1					
+VSC28-1-B																			1	1																	
+VSC28-2-B												1																				1					
+VSC29-2-B																																1					
+VSC30-1-B																				1												1					
+VSC31-2-B																																1					
+VSC32-1-B														1																							
+VSC32-2-B																			1	1												1					
+VSC33-1-B																					1																
+VSC33-1-T																																1					
+VSC33-2-B																																1					
+VSC34-2-B																			1																		
+VSC35-1-T																			1																		
+VSC35-2-B																			1																		
+VSC35-2-T																			1																		
+VSC36-2-B																																1					
+VSC37-1-B																																1					
+VSC39-2-B																																1					
+VSC39-2-T														1																							
+VSC40-2-B																					1																
+VSC41-2-B																		1		1																	
+VSC42-1-T																								1								1					
+VSC42-2-B																			1													1					
+VSC44-1-B																															1						
+VSC44-1-T			1													1																					
+VSC44-2-B															1																	1					
+VSC45-1-B																		1																			
+VSC45-1-T													1										1														
+VSC47-1-B												1																									
+VSC47-2-B																					1																
+VSC50-2-B																1								1													
+VSC53-1-B												1																									
+VSC53-2-B																			1					1													
