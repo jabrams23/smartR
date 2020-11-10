@@ -14,11 +14,11 @@ library(rgeos)
 setwd("~/Documents/GitHub/smartR/objective2")
 
 # Load data
-threat <- raster("~/Documents/GitHub/smartR/objective2/Data/cumulative_rasters/Detections_cumul_AllTraps.tif")
+threat <- raster("~/Dropbox (ScreenForBio)/Jesse's stuff/smartpatrol/objective2/Data/cumulative_rasters/Detections_cumul_AllTraps.tif")
 
 plot(threat)
 
-neighborhoods <- readOGR(dsn='~/Documents/GitHub/smartR/objective2/Data/GIS_data', layer='HQNSLPAsnew', stringsAsFactors = F)
+neighborhoods <- readOGR(dsn="~/Dropbox (ScreenForBio)/Jesse's stuff/smartpatrol/objective2/Data/GIS_data", layer='HQNSLPAsnew', stringsAsFactors = F)
 neighborhoods <- spTransform(neighborhoods, proj4string(threat))
 plot(neighborhoods, col=terrain.colors(nrow(neighborhoods)))
 
@@ -41,8 +41,10 @@ palette=c("#0000FF80", "#8080FF80", "#FFFFFF80", "#FF808080", "#FF000080")
 col = palette[cut(getisgrid$HOTSPOT, breaks)]
 
 # Plot
+png(file="hotspot.png", width = 10, height = 15, units = 'in', res = 300)
 plot(getisgrid, col=col, border=NA)
 plot(neighborhoods, border="black", add=T)
+dev.off()
 
 
 
