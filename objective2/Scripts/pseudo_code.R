@@ -16,11 +16,14 @@ calculate_reward <- function(reward_input, cell){
   return(reward)
 }
 
-select_next_cell <- function(cell, transition_mat){
+select_next_cell <- function(cost_layer,cell, transition_mat, covered){
   potential_cells <- adjacent(cost_layer, cell, directions=8, pairs=FALSE, target=NULL, sorted=FALSE, 
                               include=FALSE, id=FALSE) 
-  next_cell <- potential_cells[which.min(cost_layer[potential_cells])]
-  #next_cell <- pick cell from 8 neighbors with highest transition probability
+  potential_cells <- potential_cells[!potential_cells %in% covered]
+  next_cell <- sample(x=potential_cells,
+                      size=1,
+                      prob=cost_layer[potential_cells])
+  #next_cell <- potential_cells[which.min(cost_layer[potential_cells])]
   return(next_cell)
 }
 
@@ -28,15 +31,15 @@ generate_route <- function(start_cell,trans_mat,cost_layer,reward_layer,t){
   current_cell <- start_cell
   cells_covered <- start_cell
   while (total_cost < t){
-    current_cell <- select_next_cell(current_cell,trans_mat)
+    current_cell <- select_next_cell(cost_layer,current_cell,trans_mat,cells_covered)
     total_reward <- total_reward + calculate_reward(reward_input=reward_layer,
                                                     cell=current_cell)
     total_cost <- total_cost + cost_layer[current_cell]
     cells_covered <- cbind(cells_covered,current_cell)
   }
   tmp_return <- list(cells_covered,total_reward)
-  #return(tmp_return)
-  return(total_reward)
+  return(tmp_return)
+  #return(total_reward)
 }
 
 update_transition <- function(transition_mat){
@@ -57,12 +60,16 @@ cost_layer <- road_map
 values(cost_layer) <- sample(seq(0,10),100,replace=TRUE)
 transition_mat <- matrix(data=0,nrow=10,ncol=10)
 
+range01 <- function(x){(x-min(x))/(max(x)-min(x))}
+
+values(cost_layer) <- range01(values(cost_layer))
+
 
 test <- generate_route(start_cell=1,
                        trans_mat=transition_mat,
                        cost_layer=cost_layer,
                        reward_layer=reward_layer,
-                       t=100)
+                       t=10)
 
 
 library(CEoptim)
