@@ -19,10 +19,10 @@ calculate_reward <- function(reward_input, cell){
 select_next_cell <- function(cost_layer,cell, transition_mat, covered){
   potential_cells <- adjacent(cost_layer, cell, directions=8, pairs=FALSE, target=NULL, sorted=FALSE, 
                               include=FALSE, id=FALSE) 
-  potential_cells <- potential_cells[!potential_cells %in% covered]
+  potential_cells <- potential_cells[!potential_cells %in% cell]
   next_cell <- sample(x=potential_cells,
                       size=1,
-                      prob=cost_layer[potential_cells])
+                      prob=transition_mat[potential_cells])
   #next_cell <- potential_cells[which.min(cost_layer[potential_cells])]
   return(next_cell)
 }
@@ -42,8 +42,37 @@ generate_route <- function(start_cell,trans_mat,cost_layer,reward_layer,t){
   #return(total_reward)
 }
 
-update_transition <- function(transition_mat){
-  return(new_tran_mat)
+
+ce <- function(numb,mat) {
+  rew <- rep(0,numb)
+  route <- vector(mode = "list", length = numb)
+  route2 <- matrix(numb,100)
+  for (i in 1:numb) {
+    print(i)
+    tmp <- generate_route(start_cell=1,
+                          trans_mat=mat,
+                          cost_layer=cost_layer,
+                          reward_layer=reward_layer,
+                          t=100)
+    rew[i]<-tmp[[2]]
+    route[[i]]<-as.vector(tmp[[1]])
+    #route2[i,as.vector(tmp[[1]])]
+  }
+  ten_percent <- 0.1 * numb
+  tmp2 <- sort(rew, decreasing = TRUE)
+  tmp_10 <- tmp2[ten_percent]
+  selected_routes <- route[which(rew>=tmp_10)]
+  return(selected_routes)
+}
+
+update_transition <- function(transition_mat,select){
+  tmp1 <- unlist(select)
+  tmp3 <- as.data.frame(table(tmp1))
+  transition_mat <- melt(matrix(data=0,nrow=100,ncol=100))
+  rows_match <-as.vector(as.numeric(as.character(tmp3$tmp1)))
+  transition_mat$value[rows_match] <- as.vector(tmp3$Freq)/numb
+  transition_mat$value <- ifelse(transition_mat$value>1, 1, transition_mat$value)
+  transition_mat <- t(matrix(transition_mat$value,nrow = 100,ncol = 100))
 }
 
 
@@ -52,24 +81,58 @@ total_reward <- 0
 
 library(raster)
 
-road_map <- raster(ncol=10, nrow=10)
+road_map <- raster(ncol=100, nrow=100)
 values(road_map) <- 1:ncell(road_map)
 reward_layer <- road_map
-values(reward_layer) <- sample(seq(0,1000),100)
+values(reward_layer) <- sample(seq(0,100),10000)
 cost_layer <- road_map
-values(cost_layer) <- sample(seq(0,10),100,replace=TRUE)
-transition_mat <- matrix(data=0,nrow=10,ncol=10)
+values(cost_layer) <- sample(seq(0,10),10000,replace=TRUE)
+transition_mat <- matrix(data=0.5,nrow=100,ncol=100)
 
 range01 <- function(x){(x-min(x))/(max(x)-min(x))}
 
 values(cost_layer) <- range01(values(cost_layer))
 
+#test <- generate_route(start_cell=1,
+#                       trans_mat=transition_mat,
+#                       cost_layer=cost_layer,
+#                       reward_layer=reward_layer,
+#                       t=10)
 
-test <- generate_route(start_cell=1,
-                       trans_mat=transition_mat,
-                       cost_layer=cost_layer,
-                       reward_layer=reward_layer,
-                       t=10)
+numb<-100
+
+reps<-10
+for (i in 1:reps) {
+  test <- ce(numb,transition_mat)
+  transition_mat <- update_transition(transition_mat,test)
+}
+
+
+
+
+
+
+
+
+
+
+
+
+to_opt <- function(X) {
+  return(rew[X])
+}
+
+mu0 <- c(5, 5, 5, 5, 5); sigma0 <- c(5, 5, 5, 5, 5)
+res <- CEoptim(to_opt,
+               maximize=TRUE,
+               continuous = list(mean = mu0, sd = sigma0),
+               rho = 0.1, 
+               N = 10L, 
+               verbose = TRUE, 
+               noImproveThr = Inf)
+res
+
+
 
 
 library(CEoptim)
@@ -88,7 +151,7 @@ maximum <- CEoptim(f=generate_route,
                               trans_mat=transition_mat,
                               cost_layer=cost_layer,
                               reward_layer=reward_layer,
-                              t=100), 
+                              t=10), 
                    verbose = TRUE,
                    maximize=TRUE,
                    N=10L)
