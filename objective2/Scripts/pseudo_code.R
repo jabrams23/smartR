@@ -10,6 +10,11 @@
 
 # then we repeat that until we reach convergence
 
+library(reshape2)
+library(raster)
+
+
+##### FUNCTIONS
 
 calculate_reward <- function(reward_input, cell){
   reward <- reward_input[cell]
@@ -43,20 +48,18 @@ generate_route <- function(start_cell,trans_mat,cost_layer,reward_layer,t){
 }
 
 
-ce <- function(numb,mat) {
+ce <- function(numb,mat,cost,reward,time) {
   rew <- rep(0,numb)
   route <- vector(mode = "list", length = numb)
-  route2 <- matrix(numb,100)
   for (i in 1:numb) {
     print(i)
     tmp <- generate_route(start_cell=1,
                           trans_mat=mat,
-                          cost_layer=cost_layer,
-                          reward_layer=reward_layer,
-                          t=100)
+                          cost_layer=cost,
+                          reward_layer=reward,
+                          t=time)
     rew[i]<-tmp[[2]]
     route[[i]]<-as.vector(tmp[[1]])
-    #route2[i,as.vector(tmp[[1]])]
   }
   ten_percent <- 0.1 * numb
   tmp2 <- sort(rew, decreasing = TRUE)
@@ -65,46 +68,39 @@ ce <- function(numb,mat) {
   return(selected_routes)
 }
 
-update_transition <- function(transition_mat,select){
+update_transition <- function(cost_matrix,tran_mat,select){
   tmp1 <- unlist(select)
   tmp3 <- as.data.frame(table(tmp1))
-  transition_mat <- melt(matrix(data=0,nrow=100,ncol=100))
-  rows_match <-as.vector(as.numeric(as.character(tmp3$tmp1)))
-  transition_mat$value[rows_match] <- as.vector(tmp3$Freq)/numb
-  transition_mat$value <- ifelse(transition_mat$value>1, 1, transition_mat$value)
-  transition_mat <- t(matrix(transition_mat$value,nrow = 100,ncol = 100))
+  tran_mat@data@values[tmp3$tmp1] <- as.vector(tmp3$Freq)/numb
+  return(tran_mat)
 }
 
+range01 <- function(x){(x-min(x))/(max(x)-min(x))}
+
+
+########## TESTING
 
 total_cost <- 0
 total_reward <- 0
 
-library(raster)
-
 road_map <- raster(ncol=100, nrow=100)
 values(road_map) <- 1:ncell(road_map)
 reward_layer <- road_map
-values(reward_layer) <- sample(seq(0,100),10000)
+values(reward_layer) <- sample(seq(0,100),10000,replace=TRUE)
 cost_layer <- road_map
 values(cost_layer) <- sample(seq(0,10),10000,replace=TRUE)
-transition_mat <- matrix(data=0.5,nrow=100,ncol=100)
-
-range01 <- function(x){(x-min(x))/(max(x)-min(x))}
 
 values(cost_layer) <- range01(values(cost_layer))
 
-#test <- generate_route(start_cell=1,
-#                       trans_mat=transition_mat,
-#                       cost_layer=cost_layer,
-#                       reward_layer=reward_layer,
-#                       t=10)
+transition_mat <- cost_layer
+values(transition_mat) <- 0.0
 
 numb<-100
-
-reps<-10
+reps<-100
 for (i in 1:reps) {
-  test <- ce(numb,transition_mat)
-  transition_mat <- update_transition(transition_mat,test)
+  transition_mat <- (0.5*cost_layer)+(0.5*transition_mat)
+  test <- ce(numb,transition_mat,cost_layer,reward_layer,1000)
+  transition_mat <- update_transition(cost_layer,transition_mat,test)
 }
 
 
