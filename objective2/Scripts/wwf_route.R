@@ -31,16 +31,17 @@ select_next_cell <- function(cost_layer,cell, transition_mat, covered){
   potential_cells <- adjacent(cost_layer, cell, directions=8, pairs=FALSE, target=NULL, sorted=FALSE, 
                               include=FALSE, id=FALSE) 
   potential_cells <- potential_cells[!potential_cells %in% covered]
+  potential_cells <- potential_cells[!is.na(transition_mat[potential_cells])]
   
   if(length(potential_cells)==0) {
     potential_cells <- adjacent(cost_layer, cell, directions=8, pairs=FALSE, target=NULL, sorted=FALSE, 
-                                include=FALSE, id=FALSE) 
+                                 include=FALSE, id=FALSE) 
   }
   
   if(max(transition_mat[potential_cells],na.rm=TRUE)==0) {
     potential_cells <- sample(x = adjacent(cost_layer, cell, directions=8, pairs=FALSE, target=NULL, sorted=FALSE, 
-                                           include=FALSE, id=FALSE),
-                              size=1)
+                                            include=FALSE, id=FALSE),
+                               size=1)
   }
   
   potential_cells <- potential_cells[!is.na(transition_mat[potential_cells])]
@@ -65,7 +66,7 @@ generate_route <- function(start_cell,trans_mat,cost_layer,reward_layer,t){
   cells_covered <- start_cell
   while (total_cost < t){
     previous_cell <- current_cell
-    current_cell <- select_next_cell(cost_layer,current_cell,trans_mat,cells_covered)
+    current_cell <- select_next_cell(cost_layer,previous_cell,trans_mat,cells_covered)
     total_reward <- total_reward + calculate_reward(reward_input=reward_layer,
                                                     cell=current_cell)
     cost <- calculate_cost(cost_layer,previous_cell,current_cell)
@@ -77,7 +78,7 @@ generate_route <- function(start_cell,trans_mat,cost_layer,reward_layer,t){
   #return(total_reward)
 }
 
-ce <- function(numb,mat,cost,reward,start,time) {
+ce <- function(numb,mat,cost,reward,start,total_time) {
   #setup parallel backend to use many processors
   cores=detectCores()
   cl <- makeCluster(cores[1]-2) #not to overload your computer
@@ -102,7 +103,7 @@ ce <- function(numb,mat,cost,reward,start,time) {
                           trans_mat=mat,
                           cost_layer=cost,
                           reward_layer=reward,
-                          t=time)
+                          t=total_time)
   }
   
   stopCluster(cl)
@@ -122,7 +123,8 @@ ce <- function(numb,mat,cost,reward,start,time) {
 update_transition <- function(cost_matrix,tran_mat,select,numbr){
   tmp1 <- unlist(select)
   tmp3 <- as.data.frame(table(tmp1))
-  tran_mat@data@values[!is.na(tran_mat@data@values)] <- 0
+  tmp3$tmp1 <- as.numeric(as.character(tmp3$tmp1))
+  #tran_mat@data@values[!is.na(tran_mat@data@values)] <- 0
   tran_mat@data@values[tmp3$tmp1] <- as.vector(tmp3$Freq)/(numbr*0.1)
   tran_mat@data@values <- ifelse(tran_mat@data@values>1, 1, tran_mat@data@values)
   return(tran_mat)
@@ -131,30 +133,25 @@ update_transition <- function(cost_matrix,tran_mat,select,numbr){
 range01 <- function(x){(x-min(x,na.rm=TRUE))/(max(x,na.rm=TRUE)-min(x,na.rm=TRUE))}
 
 
-
 ########## TESTING
 
 
-road_map <- raster(ncol=10, nrow=10)
-values(road_map) <- 1:ncell(road_map)
-reward_layer <- road_map
-values(reward_layer) <- sample(seq(0,100),100,replace=TRUE)
-cost_layer <- road_map
-values(cost_layer) <- sample(seq(0,10),100,replace=TRUE)
-
-values(cost_layer) <- range01(values(cost_layer))
-
+reward_layer <- hotspots
+cost_layer <- cost
+#values(cost_layer) <- range01(values(cost_layer))
 transition_mat <- cost_layer
-#values(transition_mat) <- 0.0
+values(transition_mat) <- 0.5
+transition_mat <- mask(transition_mat,cost_layer)
 
 numb<-1000
-reps<-1000
+reps<-100
 for (i in 1:reps) {
   #transition_mat <- (0.5*(1-cost_layer))+(0.5*transition_mat)
-  test <- ce(numb,transition_mat,cost_layer,reward_layer,start=1,20)
+  print(i)
+  test <- ce(numb,transition_mat,cost_layer,reward_layer,start=25000,total_time=10000000)
   transition_mat <- update_transition(cost_layer,transition_mat,test,numb)
   plot(transition_mat)
 }
 
-
+#numb=numb;mat=transition_mat;cost=cost_layer;reward=reward_layer;start=25000;time=100
 
