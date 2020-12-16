@@ -27,7 +27,19 @@ calculate_cost <- function(costlayer,prev,cur){
   return(tmp_cost)
 }
 
-select_next_cell <- function(cost_layer,cell, transition_mat, covered){
+calculate_transition_cost <- function(cur,pot,tran_mat){
+  if(length(pot)==1) {
+    tran_mat[pot] <- abs(tran_mat[cur]-tran_mat[pot])
+  }
+  else {
+    for(j in 1:length(pot)){
+      tran_mat[pot[j]] <- abs(tran_mat[cur]-tran_mat[pot[j]])
+    }
+  }  
+  return(tran_mat)
+}
+
+select_next_cell <- function(cost_layer,cell, transition_mat, covered,repnum){
   potential_cells <- adjacent(cost_layer, cell, directions=8, pairs=FALSE, target=NULL, sorted=FALSE, 
                               include=FALSE, id=FALSE) 
   potential_cells <- potential_cells[!potential_cells %in% covered]
@@ -46,6 +58,10 @@ select_next_cell <- function(cost_layer,cell, transition_mat, covered){
   
   potential_cells <- potential_cells[!is.na(transition_mat[potential_cells])]
   
+  if(repnum==1) {
+    transition_mat <- calculate_transition_cost(cell,potential_cells,transition_mat)
+  }
+  
   if(length(potential_cells)==1) {
     next_cell <- potential_cells
   } else {
@@ -53,11 +69,10 @@ select_next_cell <- function(cost_layer,cell, transition_mat, covered){
                         size=1,
                         prob=transition_mat[potential_cells])
   }
-  #next_cell <- potential_cells[which.min(cost_layer[potential_cells])]
   return(next_cell)
 }
 
-generate_route <- function(start_cell,trans_mat,cost_layer,reward_layer,t){
+generate_route <- function(start_cell,trans_mat,cost_layer,reward_layer,t,repnum){
   library(reshape2)
   library(raster)
   total_cost <- 0
@@ -66,7 +81,7 @@ generate_route <- function(start_cell,trans_mat,cost_layer,reward_layer,t){
   cells_covered <- start_cell
   while (total_cost < t){
     previous_cell <- current_cell
-    current_cell <- select_next_cell(cost_layer,previous_cell,trans_mat,cells_covered)
+    current_cell <- select_next_cell(cost_layer,previous_cell,trans_mat,cells_covered,repnum)
     total_reward <- total_reward + calculate_reward(reward_input=reward_layer,
                                                     cell=current_cell)
     cost <- calculate_cost(cost_layer,previous_cell,current_cell)
@@ -78,32 +93,29 @@ generate_route <- function(start_cell,trans_mat,cost_layer,reward_layer,t){
   #return(total_reward)
 }
 
-ce <- function(numb,mat,cost,reward,start,total_time) {
+ce <- function(numb,mat,cost,reward,start,total_time,repnum) {
   #setup parallel backend to use many processors
   cores=detectCores()
-  cl <- makeCluster(cores[1]-2) #not to overload your computer
+  cl <- makeCluster(cores[1]-2) #not to overload computer
   registerDoParallel(cl)
+  #clusterCall(cl, function(x) .libPaths(x), .libPaths())
   
   rew <- rep(0,numb)
   route <- vector(mode = "list", length = numb)
-  #for (i in 1:numb) 
-  #  print(i)
-  #  tmp <- generate_route(start_cell=1,
-  #                        trans_mat=mat,
-  #                        cost_layer=cost,
-  #                        reward_layer=reward,
-  #                        t=time)
-  #  rew[i]<-tmp[[2]]
-  #  route[[i]]<-as.vector(tmp[[1]])
-  #}
   
-  tmp_test <- foreach(i = 1:numb, .export=c("calculate_cost","calculate_reward", "generate_route","select_next_cell")) %dopar% {
-    print(i)
-    tmp <- generate_route(start_cell=start,
-                          trans_mat=mat,
-                          cost_layer=cost,
-                          reward_layer=reward,
-                          t=total_time)
+  tmp_test <- foreach(o = 1:numb, .export=c("calculate_transition_cost","calculate_cost","calculate_reward", "generate_route","select_next_cell")) %dopar% {
+    #print(i)
+    #startcell <- rep(start,numb/5)
+    #startcell <- startcell[o]
+    startcell <- sample(start,1)
+    tryCatch({
+      tmp <- generate_route(start_cell=startcell,
+                            trans_mat=mat,
+                            cost_layer=cost,
+                            reward_layer=reward,
+                            t=total_time,
+                            repnum)
+    }, error=function(e){})
   }
   
   stopCluster(cl)
@@ -135,20 +147,21 @@ range01 <- function(x){(x-min(x,na.rm=TRUE))/(max(x,na.rm=TRUE)-min(x,na.rm=TRUE
 
 ########## TESTING
 
-
 reward_layer <- hotspots
 cost_layer <- cost
-#values(cost_layer) <- range01(values(cost_layer))
 transition_mat <- cost_layer
-values(transition_mat) <- 0.5
-transition_mat <- mask(transition_mat,cost_layer)
+values(transition_mat) <- 1-range01(values(transition_mat))
 
 numb<-1000
-reps<-100
+reps<-200
+
+start<-start_cells
+#start<-c(24155,24155)
+
 for (i in 1:reps) {
   #transition_mat <- (0.5*(1-cost_layer))+(0.5*transition_mat)
   print(i)
-  test <- ce(numb,transition_mat,cost_layer,reward_layer,start=25000,total_time=10000000)
+  test <- ce(numb,transition_mat,cost_layer,reward_layer,start=start,total_time=100,repnum=i)
   transition_mat <- update_transition(cost_layer,transition_mat,test,numb)
   plot(transition_mat)
 }
